@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "perseus"
+version = "0.1.0"
+description = "Snapshot management tool"
+authors = ["Boger <kotvberloge@gmail.com>"]
+license = "MIT"
+readme = 'README.md'
+repository = "https://github.com/b0g3r/perseus"
+homepage = "https://github.com/b0g3r/perseus"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+
+[tool.poetry.dev-dependencies]
+mypy = "^0.750"
+
+[tool.poetry.scripts]
+plantuml2freemind = 'perseus.cli:main'
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

@@ -1,0 +1,19 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.py]
+indent_style = space
+indent_size = 4
+max_line_length = 99
+ij_python_from_import_new_line_after_left_parenthesis = true
+ij_python_from_import_new_line_before_right_parenthesis = true
+ij_python_from_import_trailing_comma_if_multiline = true
+ij_python_optimize_imports_sort_names_in_from_imports = true
+ij_python_from_import_wrapping = 2
+ij_python_dict_wrapping = 2
+ij_python_from_import_parentheses_force_if_multiline = true
