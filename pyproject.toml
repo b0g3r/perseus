@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "perseus"
-version = "0.1.0"
+version = "0.1.1"
 description = "Snapshot management tool"
 authors = ["Boger <kotvberloge@gmail.com>"]
 license = "MIT"
