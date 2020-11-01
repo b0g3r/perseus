@@ -4,7 +4,8 @@ Tool for snapshot management. In early progress stage
 
 ## Prerequisites
 
-- python >= 3.7
+- python >= 3.6
+- pytest >= 4.0
 
 ## Installation
 
@@ -19,8 +20,7 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 ### Local development
 The project uses poetry as a dependency management tool. For local development convenient way to installing and
-running project is using `poetry install`. Please, use [>=1.0.0 version](https://pypi.org/project/poetry/#history) of
-poetry even if it is a beta-version.
+running project is using `poetry install`.
 
 Poetry automatically creates venv (or uses already activated venv) and install all requirements to it and the project
 itself as `editable` .
