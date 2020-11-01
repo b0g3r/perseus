@@ -231,6 +231,7 @@ class SnapshotTest(object):
         formatter.assert_value_matches_snapshot(self, test_value, snapshot_value, Formatter())
 
     def assert_equals(self, value, snapshot):
+        __tracebackhide__ = True
         assert value == snapshot
 
     def assert_match(self, value, name=''):
