@@ -54,6 +54,7 @@ class PyTestSnapshotTest(SnapshotTest):
         )
 
     def assert_match(self, value, name=''):
+        __tracebackhide__ = True
         self.curr_snapshot = name or self.snapshot_counter
         self.visit()
         try:

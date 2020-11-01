@@ -17,6 +17,7 @@ class BaseFormatter(object):
         return ()
 
     def assert_value_matches_snapshot(self, test, test_value, snapshot_value, formatter):
+        __tracebackhide__ = True
         test.assert_equals(formatter.normalize(test_value), snapshot_value)
 
     def store(self, test, value):
