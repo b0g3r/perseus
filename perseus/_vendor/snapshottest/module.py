@@ -234,15 +234,15 @@ class SnapshotTest(object):
         __tracebackhide__ = True
         assert value == snapshot
 
+    def assert_match(self, value, name=''):
+        import warnings
+        warnings.warn(
+            'snapshot.assert_match() is deprecated, use `assert snapshot.match()`',
+            DeprecationWarning
+        )
+        self.match(value, name)
+
     def match(self, value, name=''):
-        """
-        Compares given value with stored snapshot
-
-        Returns True or raises AssertionError if value doesn't match current snapshot
-
-        Preferred usage is:
-            assert snapshot.match('foo')
-        """
         self.curr_snapshot = name or self.snapshot_counter
         self.visit()
         if self.update:
