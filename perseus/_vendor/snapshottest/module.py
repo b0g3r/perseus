@@ -235,6 +235,14 @@ class SnapshotTest(object):
         assert value == snapshot
 
     def assert_match(self, value, name=''):
+        import warnings
+        warnings.warn(
+            'snapshot.assert_match() is deprecated, use `assert snapshot.match()`',
+            DeprecationWarning
+        )
+        self.match(value, name)
+
+    def match(self, value, name=''):
         self.curr_snapshot = name or self.snapshot_counter
         self.visit()
         if self.update:
@@ -253,6 +261,8 @@ class SnapshotTest(object):
 
         if not name:
             self.snapshot_counter += 1
+
+        return True
 
     def save_changes(self):
         self.module.save()

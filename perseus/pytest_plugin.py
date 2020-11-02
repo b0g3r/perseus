@@ -53,8 +53,15 @@ class PyTestSnapshotTest(SnapshotTest):
             self.curr_snapshot,
         )
 
-    def assert_match(self, value, name=''):
-        __tracebackhide__ = True
+    def match(self, value, name=''):
+        """
+        Compares given value with stored snapshot
+
+        Returns True or raises AssertionError if value doesn't match current snapshot
+
+        Preferred usage is:
+            assert snapshot.match('foo')
+        """
         self.curr_snapshot = name or self.snapshot_counter
         self.visit()
         try:
@@ -77,6 +84,8 @@ class PyTestSnapshotTest(SnapshotTest):
                     self.store(value)
         if not name:
             self.snapshot_counter += 1
+
+        return True
 
 
 @pytest.fixture
