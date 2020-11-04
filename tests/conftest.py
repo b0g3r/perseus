@@ -1,5 +1,8 @@
 import sys
 import traceback
+from io import TextIOWrapper
+from itertools import islice
+
 from _pytest.config import ExitCode
 from importlib import reload
 from pathlib import Path
@@ -31,7 +34,7 @@ class ReadFromInput(DontReadFromInput):
     encoding = 'utf-8'
 
     def __init__(self, stdin=None):
-        inputs = stdin.decode(self.encoding).split('\n') if stdin else []
+        inputs = stdin.decode(self.encoding).split('\n') if stdin is not None else []
         self.input_count = len(inputs)
         self.inputs = iter(inputs)
 
@@ -43,9 +46,14 @@ class ReadFromInput(DontReadFromInput):
                 f'Attempt to read more inputs than were provided ({self.input_count} was provided)'
             )
 
+    def readlines(self, hint: int = -1):
+        while hint > 0:
+            yield self.read()
+            hint -= 1
+
     readline = read
-    readlines = read
     __next__ = read
+    __iter__ = readlines
 
     def close(self) -> None:
         unread_inputs = list(self.inputs)
