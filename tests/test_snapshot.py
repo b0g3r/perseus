@@ -1,7 +1,6 @@
 import sys
 import traceback
 from importlib import reload
-from io import UnsupportedOperation
 from pathlib import Path
 from typing import (
     Any,
