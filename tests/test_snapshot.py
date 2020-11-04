@@ -46,22 +46,6 @@ class ReadFromInput(DontReadFromInput):
     readlines = read
     __next__ = read
 
-    def __iter__(self):
-        return self
-
-    def fileno(self) -> int:
-        raise UnsupportedOperation("redirected stdin is pseudofile, has no fileno()")
-
-    def isatty(self) -> bool:
-        return False
-
-    def close(self) -> None:
-        pass
-
-    @property
-    def buffer(self):
-        return self
-
 
 class PerseusTester(Testdir):
     """
