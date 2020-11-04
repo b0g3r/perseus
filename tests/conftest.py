@@ -47,6 +47,11 @@ class ReadFromInput(DontReadFromInput):
     readlines = read
     __next__ = read
 
+    def close(self) -> None:
+        unread_inputs = list(self.inputs)
+        if unread_inputs:
+            raise RuntimeError(f'Some provided inputs were not read: {unread_inputs}')
+
 
 class PerseusTester(Testdir):
     """
