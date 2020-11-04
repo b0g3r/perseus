@@ -1,4 +1,7 @@
+import sys
+import traceback
 from importlib import reload
+from io import UnsupportedOperation
 from pathlib import Path
 from typing import (
     Any,
@@ -7,6 +10,12 @@ from typing import (
 )
 
 import pytest
+from _pytest import timing
+from _pytest.capture import (
+    DontReadFromInput,
+    MultiCapture,
+    SysCapture,
+)
 from _pytest.config import ExitCode
 from _pytest.pathlib import make_numbered_dir
 from _pytest.pytester import (
@@ -15,6 +24,43 @@ from _pytest.pytester import (
 )
 
 from perseus._vendor.snapshottest import Snapshot
+
+
+class ReadFromInput(DontReadFromInput):
+    encoding = 'utf-8'
+
+    def __init__(self, stdin=None):
+        inputs = stdin.decode(self.encoding).split('\n') if stdin else []
+        self.input_count = len(inputs)
+        self.inputs = iter(inputs)
+
+    def read(self, *args):
+        try:
+            return next(self.inputs)
+        except StopIteration:
+            raise RuntimeError(
+                f'Attempt to read more inputs than were provided ({self.input_count} was provided)'
+            )
+
+    readline = read
+    readlines = read
+    __next__ = read
+
+    def __iter__(self):
+        return self
+
+    def fileno(self) -> int:
+        raise UnsupportedOperation("redirected stdin is pseudofile, has no fileno()")
+
+    def isatty(self) -> bool:
+        return False
+
+    def close(self) -> None:
+        pass
+
+    @property
+    def buffer(self):
+        return self
 
 
 class PerseusTester(Testdir):
@@ -43,6 +89,55 @@ class PerseusTester(Testdir):
         args = self._getpytestargs() + args
         return self.run(*args, **kwargs)
 
+    def runpytest_inprocess(self, *args, stdin=None, **kwargs) -> RunResult:
+        """
+        Same as Testdir.runpytest_inprocess, but with support of stdin.
+        Yes, it's ugly :(
+
+        Return result of running pytest in-process, providing a similar
+        interface to what self.runpytest() provides."""
+        __tracebackhide__ = True
+        syspathinsert = kwargs.pop("syspathinsert", False)
+
+        if syspathinsert:
+            self.syspathinsert()
+        now = timing.time()
+        input_reader = ReadFromInput(stdin)
+        capture = MultiCapture(
+            in_=SysCapture(0, tmpfile=input_reader), out=SysCapture(1), err=SysCapture(2)
+        )
+        capture.start_capturing()
+        try:
+            try:
+                reprec = self.inline_run(*args, **kwargs)
+            except SystemExit as e:
+                ret = e.args[0]
+                try:
+                    ret = ExitCode(e.args[0])
+                except ValueError:
+                    pass
+
+                class reprec:  # type: ignore
+                    ret = ret
+            except Exception:
+                traceback.print_exc()
+
+                class reprec:  # type: ignore
+                    ret = ExitCode(3)
+
+        finally:
+            out, err = capture.readouterr()
+            capture.stop_capturing()
+            sys.stdout.write(out)
+            sys.stderr.write(err)
+
+        assert reprec.ret is not None
+        res = RunResult(
+            reprec.ret, out.splitlines(), err.splitlines(), timing.time() - now
+        )
+        res.reprec = reprec  # type: ignore
+        return res
+
     def run_perseus(
         self,
         sample_name: str,
@@ -53,7 +148,7 @@ class PerseusTester(Testdir):
         """
         snapshot_module = self.prepare_sample(sample_name)
         old_snapshots = snapshot_module.snapshots
-        run_result = self.runpytest_subprocess(stdin='\n'.join(inputs).encode('utf-8'))
+        run_result = self.runpytest(stdin='\n'.join(inputs).encode('utf-8'))
         reload(snapshot_module)
         new_snapshots = snapshot_module.snapshots
         return run_result, old_snapshots, new_snapshots
@@ -80,4 +175,3 @@ def test_agree_replacing(tester: PerseusTester):
     )
     assert run_result.ret == ExitCode.OK
     assert old_snapshots != new_snapshots
-
